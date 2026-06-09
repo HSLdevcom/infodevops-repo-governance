@@ -1,0 +1,87 @@
+name: Sync GitHub Repository Settings
+
+# Two engines run from here:
+#   job 1 (sync-settings)     -> marketplace action: pure settings & rulesets enforcement
+#   job 2 (compliance-audit)  -> custom script: Actions policy, team perms, HSL compliance
+#
+# Iteration 1 is audit-only on the custom side. The marketplace job honours dry-run.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'config/**'
+      - 'scripts/governance-audit/**'
+      - '.github/workflows/github-settings-sync.yml'
+  schedule:
+    - cron: '0 2 * * *' # nightly drift detection
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Dry run (detect drift without applying changes)'
+        type: boolean
+        default: true
+
+# Least privilege at the workflow level; the App token below grants the org-wide scopes.
+permissions:
+  contents: read
+
+concurrency:
+  group: github-settings-sync
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------------------
+  # Job 1 — marketplace action (forked + SHA-pinned). Settings & rulesets only.
+  # ---------------------------------------------------------------------------------------
+  sync-settings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      # TODO(org-admin): replace <commit-sha> once HSLdevcom/github-settings-sync (the fork
+      # of joshjohanning/bulk-github-repository-settings-sync) exists. Never use a tag.
+      - name: Enforce repository settings & rulesets
+        uses: HSLdevcom/github-settings-sync@0000000000000000000000000000000000000000 # TODO pin fork SHA
+        with:
+          github-token: ${{ secrets.GITHUB_SETTINGS_SYNC_TOKEN }}
+          owner: HSLdevcom
+          repositories-file: config/settings-config.yml
+          dry-run: ${{ inputs.dry-run || false }}
+          write-job-summary: true
+
+  # ---------------------------------------------------------------------------------------
+  # Job 2 — custom compliance audit (audit-only). Runs independently of job 1.
+  # ---------------------------------------------------------------------------------------
+  compliance-audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scripts/governance-audit
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: scripts/governance-audit/package-lock.json
+
+      - run: npm ci
+
+      # Mint a short-lived installation token with the App's least-privilege scopes.
+      # TODO(org-admin): create the App and store APP_ID / PRIVATE_KEY as org secrets.
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
+        with:
+          app-id: ${{ secrets.GOVERNANCE_APP_ID }}
+          private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
+          owner: HSLdevcom
+
+      - name: Run compliance audit
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        # Audit-only: do NOT pass --fail-on-drift during iteration 1. Drift is surfaced in
+        # the job summary; flip this on once the audit output is trusted.
+        run: npm run audit -- --checks=all

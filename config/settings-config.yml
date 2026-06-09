@@ -1,0 +1,59 @@
+# Marketplace-action input — pure settings & rulesets enforcement only.
+#
+# Consumed by the forked, SHA-pinned HSLdevcom/github-settings-sync action
+# (fork of joshjohanning/bulk-github-repository-settings-sync), Option 2 (rules-based).
+#
+# Rules are evaluated top-to-bottom; later rules override earlier ones for repos they
+# both match. Keep a single `all: true` baseline, then add override rules that specify
+# ONLY what differs.
+#
+# NOTE: file-sync inputs (dependabot-yml, workflow-files, pull-request-template,
+# codeowners) are intentionally NOT used here. File propagation is never delegated to
+# third-party tooling — see the trust rationale in the proposal (Implementation Approach).
+
+owner: HSLdevcom
+
+rules:
+  # ---- Baseline: applies to every repository in the org ------------------------------
+  - selector:
+      all: true
+    settings:
+      # Merge strategy: rebase-only, keep history linear, auto-merge on, tidy branches.
+      allow-squash-merge: false
+      allow-merge-commit: false
+      allow-rebase-merge: true
+      allow-auto-merge: true
+      delete-branch-on-merge: true
+
+      # Security baseline.
+      secret-scanning: true
+      secret-scanning-push-protection: true
+      dependabot-alerts: true
+      dependabot-security-updates: true
+
+      # Branch protection lives in a version-controlled ruleset file.
+      rulesets-file: config/rulesets/default-branch-protection.json
+
+  # ---- Per-repo overrides: specify only what differs from the baseline ----------------
+
+  # Example: a repo that genuinely needs merge commits.
+  - selector:
+      repos:
+        - HSLdevcom/transitlog-hfp-split-sink
+    settings:
+      allow-merge-commit: true
+
+  # Example: a repo with an extra required status check (robot tests) — adds a second
+  # ruleset on top of the default. Multiple ruleset files are comma-separated.
+  - selector:
+      repos:
+        - HSLdevcom/transitdata-metro-ats-parser
+    settings:
+      rulesets-file: config/rulesets/default-branch-protection.json,config/rulesets/robot-tests-branch-protection.json
+
+  # Example: a repo that must not use the merge queue.
+  - selector:
+      repos:
+        - HSLdevcom/mqtt-pulsar-gateway
+    settings:
+      rulesets-file: config/rulesets/no-merge-queue-branch-protection.json

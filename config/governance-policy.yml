@@ -1,0 +1,58 @@
+# Desired state for the custom compliance audit (scripts/governance-audit).
+#
+# This file covers the ~20% of governance the marketplace action does NOT handle:
+# GitHub Actions policies, team/collaborator permissions, and HSL-specific compliance
+# (shared-workflows migration, Docker base images).
+#
+# Iteration 1 is AUDIT-ONLY: the script reads this file and reports drift. It never writes.
+
+org: HSLdevcom
+
+# Which repositories the audit runs against.
+scope:
+  excludeArchived: true
+  excludeForks: true
+  # Optional: narrow to repos carrying an org custom property. Requires the GitHub App to
+  # have "Organization Custom Properties: Read". Remove/comment out to audit every repo.
+  customProperty:
+    name: team
+    value: infodevops
+
+# GitHub Actions policy — desired settings at org and repo level.
+actions:
+  # all | local_only | selected
+  allowedActions: selected
+  # When allowedActions == selected, the following must hold:
+  githubOwnedAllowed: true
+  verifiedAllowed: true
+  patternsAllowed:
+    - HSLdevcom/*
+  # read | write — default GITHUB_TOKEN permissions granted to workflows.
+  defaultWorkflowPermissions: read
+  # Whether Actions can approve pull request reviews. Should be false.
+  canApprovePullRequestReviews: false
+
+# Team & collaborator permissions.
+teams:
+  # Teams that must be granted the given role on every in-scope repo.
+  # permission: pull | triage | push | maintain | admin
+  required:
+    - slug: infodevops-team
+      permission: admin
+  # If false, any directly-added (non-team) collaborator is reported as drift.
+  allowDirectCollaborators: false
+
+# HSL-specific compliance checks (audit-only; remediation is manual).
+compliance:
+  sharedWorkflows:
+    workflowFile: .github/workflows/ci-cd.yml
+    legacyFile: .github/workflows/test-and-build.yml
+    requiredRef: HSLdevcom/transitdata-shared-workflows
+  dockerBaseImage:
+    # Files to inspect for FROM lines. Missing files are treated as "not containerized".
+    dockerfilePaths:
+      - Dockerfile
+    requiredBaseImageRepo: hsldevcom/infodevops-docker-base-images
+    forbiddenBaseImages:
+      - eclipse-temurin:11-alpine
+      - eclipse-temurin:11

@@ -1,0 +1,20 @@
+# Documented, intentional deviations from the governance policy.
+#
+# A repo listed under a check key is reported as an EXCEPTION (not drift) by that check.
+# Always add a trailing comment explaining WHY and, ideally, a tracking ticket.
+#
+# Keys map to audit check ids:
+#   shared-workflows-migration -> shared-workflows check
+#   docker-base-image          -> docker-base-image check
+#   team-permissions           -> team-permissions check
+#   actions-policy             -> actions-policy check
+
+shared-workflows-migration:
+  - HSLdevcom/jore-map-ui        # Not a transitdata service; migration not planned
+
+docker-base-image:
+  - HSLdevcom/hsl-map-publisher  # Custom Node.js base; tracked separately
+
+team-permissions: []
+
+actions-policy: []
