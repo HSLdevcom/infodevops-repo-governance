@@ -36,11 +36,17 @@ jobs:
   # ---------------------------------------------------------------------------------------
   sync-settings:
     runs-on: ubuntu-latest
+    # Skipped until org-admin completes the two prerequisites below. While skipped, GitHub
+    # does not attempt to resolve the (not-yet-existing) action, so the run no longer fails
+    # with "Unable to resolve action HSLdevcom/github-settings-sync, repository not found".
+    # To enable: (1) create the fork, (2) pin its SHA in the `uses:` line below, then set the
+    # repository variable SETTINGS_SYNC_ENABLED=true.
+    if: ${{ vars.SETTINGS_SYNC_ENABLED == 'true' }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      # TODO(org-admin): replace <commit-sha> once HSLdevcom/github-settings-sync (the fork
-      # of joshjohanning/bulk-github-repository-settings-sync) exists. Never use a tag.
+      # TODO(org-admin): replace the placeholder SHA below once HSLdevcom/github-settings-sync
+      # (the fork of joshjohanning/bulk-github-repository-settings-sync) exists. Never use a tag.
       - name: Enforce repository settings & rulesets
         uses: HSLdevcom/github-settings-sync@0000000000000000000000000000000000000000 # TODO pin fork SHA
         with:

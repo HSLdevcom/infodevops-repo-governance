@@ -59,7 +59,10 @@ and team permissions is a deliberate later iteration.
 These are flagged with `TODO` placeholders in the workflow until completed:
 
 1. **Fork** `joshjohanning/bulk-github-repository-settings-sync` into
-   `HSLdevcom/github-settings-sync` and pin a commit SHA in the workflow.
+   `HSLdevcom/github-settings-sync`, pin its commit SHA in the workflow's `uses:` line, then
+   set the repository variable `SETTINGS_SYNC_ENABLED=true` to turn the `sync-settings` job on.
+   Until that variable is `true` the job is skipped, so the workflow does not fail trying to
+   resolve the not-yet-existing fork.
 2. **Create a GitHub App** with least-privilege scopes (Administration RW, Contents RW,
    Pull Requests RW, Organization Custom Properties: Read), install it on the org, and store
    its credentials as the org secret(s) used by `actions/create-github-app-token`.
