@@ -12,11 +12,91 @@ org: HSLdevcom
 scope:
   excludeArchived: true
   excludeForks: true
-  # Optional: narrow to repos carrying an org custom property. Requires the GitHub App to
-  # have "Organization Custom Properties: Read". Remove/comment out to audit every repo.
-  customProperty:
-    name: team
-    value: infodevops
+  # Explicit allowlist — the audit runs ONLY against these repos. Accepts short name
+  # ("mqtt-pulsar-gateway") or full name ("HSLdevcom/mqtt-pulsar-gateway").
+  # excludeArchived/excludeForks still apply on top. Sourced from the team-infodevops
+  # team's repositories (2026-06-26).
+  repos:
+    - HSLdevcom/ajoaikadata
+    - HSLdevcom/digitransit-site
+    - HSLdevcom/eke-mqtt-api-spec
+    - HSLdevcom/gtfsrt2hfp
+    - HSLdevcom/helmet-ui
+    - HSLdevcom/hfp-analytics
+    - HSLdevcom/hfp-loader
+    - HSLdevcom/hsl-jore-postgis
+    - HSLdevcom/hsl-map-documentation
+    - HSLdevcom/hsl-map-generator-server
+    - HSLdevcom/hsl-map-generator-ui
+    - HSLdevcom/hsl-map-matcher
+    - HSLdevcom/hsl-map-publisher
+    - HSLdevcom/hsl-map-publisher-ui
+    - HSLdevcom/hsl-map-server
+    - HSLdevcom/hsl-map-site
+    - HSLdevcom/hsl-map-style
+    - HSLdevcom/hsl-map-tileserver-gl
+    - HSLdevcom/hsl-map-validator
+    - HSLdevcom/hsl-map-web-ui
+    - HSLdevcom/hsl-plantuml-theme
+    - HSLdevcom/hsl-route-map-poc
+    - HSLdevcom/hsl-routemap-server
+    - HSLdevcom/hsl-spritezero-cli
+    - HSLdevcom/hsl-stop-info
+    - HSLdevcom/hsl-ticket-zone-map
+    - HSLdevcom/jore-geometry-matcher
+    - HSLdevcom/jore-graphql
+    - HSLdevcom/jore-graphql-import
+    - HSLdevcom/jore-history-graphql-import
+    - HSLdevcom/jore-map-ui
+    - HSLdevcom/jore-tileserver
+    - HSLdevcom/kuljettajaohje-server
+    - HSLdevcom/map-reports
+    - HSLdevcom/mqtt-pulsar-gateway
+    - HSLdevcom/mqtt-sub-monitor
+    - HSLdevcom/openmaptiles
+    - HSLdevcom/pulsar-mqtt-gateway
+    - HSLdevcom/transitdata
+    - HSLdevcom/transitdata-alert-processor
+    - HSLdevcom/transitdata-apc-protobuf-json-transformer
+    - HSLdevcom/transitdata-cache-bootstrapper
+    - HSLdevcom/transitdata-cancellation-processor
+    - HSLdevcom/transitdata-db-monitoring
+    - HSLdevcom/transitdata-eke-sink
+    - HSLdevcom/transitdata-gtfsrt-full-publisher
+    - HSLdevcom/transitdata-hfp-deduplicator
+    - HSLdevcom/transitdata-hfp-parser
+    - HSLdevcom/transitdata-metro-ats-cancellation-source
+    - HSLdevcom/transitdata-metro-ats-parser
+    - HSLdevcom/transitdata-monitor-data-collector
+    - HSLdevcom/transitdata-omm-alert-source
+    - HSLdevcom/transitdata-omm-cancellation-source
+    - HSLdevcom/transitdata-partial-apc-expander-combiner
+    - HSLdevcom/transitdata-pubtrans-source
+    - HSLdevcom/transitdata-stop-cancellation-processor
+    - HSLdevcom/transitdata-stop-cancellation-source
+    - HSLdevcom/transitdata-stop-estimates
+    - HSLdevcom/transitdata-tripupdate-processor
+    - HSLdevcom/transitdata-vehicleposition-processor
+    - HSLdevcom/transitlog
+    - HSLdevcom/transitlog-alert-sink
+    - HSLdevcom/transitlog-apc-archive-sink
+    - HSLdevcom/transitlog-apc-sink
+    - HSLdevcom/transitlog-cancellation-sink
+    - HSLdevcom/transitlog-ekecheck
+    - HSLdevcom/transitlog-hfp-archiver
+    - HSLdevcom/transitlog-hfp-csv-sink
+    - HSLdevcom/transitlog-hfp-csv-sink-monitor
+    - HSLdevcom/transitlog-hfp-importer
+    - HSLdevcom/transitlog-hfp-split-sink
+    - HSLdevcom/transitlog-monitor
+    - HSLdevcom/transitlog-server
+    - HSLdevcom/transitlog-ui
+  # Optional: narrow to repos carrying an org custom property. Commented out so the
+  # explicit `repos` list above is the sole scope. Re-enable to additionally require the
+  # property (a repo would then need to be in the list AND carry the property).
+  # customProperty:
+  #   name: team
+  #   value: infodevops
 
 # GitHub Actions policy — desired settings at org and repo level.
 actions:

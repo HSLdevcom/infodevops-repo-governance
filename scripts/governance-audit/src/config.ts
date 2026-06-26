@@ -9,6 +9,10 @@ const policySchema = z.object({
     .object({
       excludeArchived: z.boolean().default(true),
       excludeForks: z.boolean().default(true),
+      // Explicit allowlist: when set and non-empty, the audit runs ONLY against these
+      // repos. Accepts short name ("mqtt-pulsar-gateway") or full name
+      // ("HSLdevcom/mqtt-pulsar-gateway"). excludeArchived/excludeForks still apply on top.
+      repos: z.array(z.string().min(1)).optional(),
       customProperty: z
         .object({
           name: z.string().min(1),

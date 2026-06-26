@@ -5,9 +5,9 @@ import type { RepoInfo } from './types.js';
 /**
  * Enumerate the in-scope repositories for the org.
  *
- * Applies the policy's scope filters (archived/forks) and, if a custom property is
- * configured, narrows to repos carrying that property value. Falls back to "all repos"
- * (with a warning) if the custom-property lookup is unavailable.
+ * Applies the policy's scope filters in order: an optional explicit `repos` allowlist,
+ * then an optional custom-property narrowing, then the archived/forks exclusions. Falls
+ * back to "all repos" (with a warning) if the custom-property lookup is unavailable.
  */
 export async function listRepos(
   octokit: Octokit,
@@ -31,6 +31,12 @@ export async function listRepos(
   }));
 
   let repos = all;
+
+  if (scope.repos && scope.repos.length > 0) {
+    const allow = new Set(scope.repos);
+    repos = repos.filter((r) => allow.has(r.name) || allow.has(r.fullName));
+    log(`Explicit scope.repos list matched ${repos.length} of ${all.length} repositories.`);
+  }
 
   if (scope.customProperty) {
     const matching = await reposMatchingProperty(
