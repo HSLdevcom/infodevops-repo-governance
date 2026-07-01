@@ -117,7 +117,7 @@ teams:
   # Teams that must be granted the given role on every in-scope repo.
   # permission: pull | triage | push | maintain | admin
   required:
-    - slug: infodevops-team
+    - slug: team-infodevops
       permission: admin
   # If false, any directly-added (non-team) collaborator is reported as drift.
   allowDirectCollaborators: false
